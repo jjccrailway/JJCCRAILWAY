@@ -1,0 +1,48 @@
+
+/* ---------- JCoins wallet ---------- */
+.jcoins-page { max-width: 1120px; }
+.jcoins-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:26px; }
+.jcoins-heading .eyebrow { color:var(--gold); font-size:11px; font-weight:700; letter-spacing:2px; margin-bottom:8px; }
+.jcoins-rate { display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:30px; padding:9px 15px; color:var(--navy); background:#fff; font-size:12px; font-weight:700; white-space:nowrap; }
+.jcoins-balance-panel { position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; gap:20px; min-height:210px; padding:34px 38px; border-radius:16px; background:linear-gradient(120deg,var(--navy-deep),var(--navy-2)); color:#fff; }
+.jcoins-balance-copy { position:relative; z-index:1; }
+.jcoins-balance-copy > span { color:#d6deed; font-size:11px; font-weight:700; letter-spacing:1.7px; }
+.jcoins-balance-copy strong { display:block; margin:12px 0 7px; font-family:var(--font-hero); font-size:clamp(34px,5vw,52px); line-height:1.15; }
+.jcoins-balance-copy strong small { font-family:var(--font-body); font-size:15px; font-weight:600; }
+.jcoins-balance-copy p { color:#d6deed; font-size:13px; }
+.jcoins-coin-art { display:grid; place-items:center; width:116px; height:116px; flex:0 0 116px; border:7px solid rgba(232,184,106,.9); border-radius:50%; background:radial-gradient(circle at 35% 30%,#f7d99c,var(--gold)); box-shadow:0 0 0 10px rgba(255,255,255,.07), inset 0 0 0 3px rgba(111,67,8,.18); color:#74470a; font-family:var(--font-hero); font-size:56px; font-weight:700; }
+.jcoins-summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin:18px 0 24px; }
+.jcoins-summary-card { padding:22px 23px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+.jcoins-summary-card span { display:block; color:var(--muted); font-size:12px; font-weight:600; }
+.jcoins-summary-card strong { display:block; margin:9px 0 4px; color:var(--navy); font-family:var(--font-hero); font-size:26px; }
+.jcoins-summary-card small { color:var(--muted); font-size:11px; }
+.jcoins-history { padding:25px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+.jcoins-history-head { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+.jcoins-history-head h2 { color:var(--navy); font-size:20px; }
+.jcoins-history-head p { color:var(--muted); font-size:12px; margin-top:4px; }
+.jcoins-refresh { padding:9px 15px; border:1px solid var(--navy); border-radius:7px; background:var(--navy); color:#fff; font:600 12px var(--font-body); }
+.jcoins-refresh:disabled { opacity:.55; cursor:wait; }
+.jcoins-table-wrap { width:100%; overflow-x:auto; }
+.jcoins-table { width:100%; min-width:700px; border-collapse:collapse; }
+.jcoins-table th,.jcoins-table td { padding:14px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:middle; font-size:12px; }
+.jcoins-table th { color:var(--muted); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; }
+.jcoins-table td strong { display:block; color:var(--ink); font-size:12px; }
+.jcoins-table td small { display:block; max-width:220px; margin-top:3px; color:var(--muted); font-size:10px; }
+.jcoins-credit { color:#197447; font-weight:700; white-space:nowrap; }
+.jcoins-debit { color:#b3261e; font-weight:700; white-space:nowrap; }
+.jcoins-reference { font-family:var(--font-mono); font-size:11px; }
+.jcoins-empty { padding:28px 12px!important; color:var(--muted); text-align:center!important; }
+.jcoins-footnote { margin-top:15px; color:var(--muted); font-size:11px; line-height:1.7; }
+@media(max-width:760px) {
+  .jcoins-heading { align-items:flex-start; flex-direction:column; }
+  .jcoins-summary-grid { grid-template-columns:1fr; }
+  .jcoins-balance-panel { min-height:180px; padding:25px; }
+  .jcoins-coin-art { width:82px; height:82px; flex-basis:82px; border-width:5px; font-size:40px; }
+  .jcoins-history { padding:18px; }
+}
+@media(max-width:430px) {
+  .jcoins-balance-panel { align-items:flex-start; }
+  .jcoins-coin-art { width:62px; height:62px; flex-basis:62px; font-size:30px; }
+  .jcoins-balance-copy strong { font-size:32px; }
+  .jcoins-history-head { align-items:flex-start; flex-direction:column; }
+}

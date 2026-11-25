@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JCoins Wallet | JJCC Railways</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Oswald:wght@600;700&family=Playfair+Display:wght@700&family=Yellowtail&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="jcoins.css" />
+</head>
+<body data-page="jcoins" data-active="jcoins">
+  <div id="site-header"></div>
+  <main class="wrap wrap-lg section jcoins-page">
+    <div class="jcoins-heading">
+      <div>
+        <p class="eyebrow">JJCC RAILWAYS REWARDS</p>
+        <h1 class="page-title">My JCoins Wallet</h1>
+        <p class="page-sub">Your travel credits, all in one place.</p>
+      </div>
+      <span class="jcoins-rate">₱1.00 = 1 JCoin</span>
+    </div>
+
+    <section class="jcoins-balance-panel" aria-labelledby="walletBalanceTitle">
+      <div class="jcoins-balance-copy">
+        <span id="walletBalanceTitle">AVAILABLE BALANCE</span>
+        <strong id="jcoinsBalance">— <small>JCoins</small></strong>
+        <p>Use your JCoins toward future JJCC Railways bookings.</p>
+      </div>
+      <div class="jcoins-coin-art" aria-hidden="true">
+        <span>J</span>
+      </div>
+    </section>
+
+    <section class="jcoins-summary-grid" aria-label="Wallet summary" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));">
+      <article class="jcoins-summary-card">
+        <span>Total earned</span>
+        <strong id="jcoinsEarned">—</strong>
+        <small>Refunds and compensation credits</small>
+      </article>
+      <article class="jcoins-summary-card">
+        <span>Total spent</span>
+        <strong id="jcoinsSpent">—</strong>
+        <small>JCoins used for bookings</small>
+      </article>
+    </section>
+
+    <section class="jcoins-history panel">
+      <div class="jcoins-history-head">
+        <div>
+          <h2>Transaction History</h2>
+          <p>Track every JCoins credit and debit in your wallet.</p>
+        </div>
+        <button class="jcoins-refresh" id="refreshJcoins" type="button">Refresh</button>
+      </div>
+      <p class="notice notice-info" id="jcoinsMessage" role="status">Loading your wallet…</p>
+      <div class="jcoins-table-wrap">
+        <table class="jcoins-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Transaction</th>
+              <th>Booking Reference</th>
+              <th>Amount</th>
+              <th>Balance After</th>
+            </tr>
+          </thead>
+          <tbody id="jcoinsTransactions">
+            <tr><td colspan="5" class="jcoins-empty">Loading transactions…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="jcoins-footnote">JCoins are non-transferable, cannot be withdrawn as cash, and never expire. Wallet credits and deductions will appear here once the related transaction is processed.</p>
+  </main>
+  <div id="site-footer"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
+  <script src="php-api.js"></script>
+  <script src="jcoins.js"></script>
+</body>
+</html>

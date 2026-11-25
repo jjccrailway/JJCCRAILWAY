@@ -1,0 +1,13 @@
+/* Privacy Policy page-only layout fixes */
+.legal-page.privacy-page { text-align: justify; }
+.legal-heading,
+.legal-page > .legal-content { width: min(900px, 100%); margin-left: auto; margin-right: auto; box-sizing: border-box; }
+.legal-heading { margin-bottom: 0; }
+.legal-page > .legal-content { margin-top: 22px; }
+.legal-page .legal-content,
+.legal-page .legal-content p,
+.legal-page .legal-content li,
+.legal-page .legal-content h2 { text-align: justify; }
+.legal-page .legal-content ul { padding-left: 0; margin-left: 0; list-style-position: inside; }
+.legal-page .legal-content li { padding-left: 0; margin-left: 0; }
+.privacy-page .legal-content ul { list-style: none; }

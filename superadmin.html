@@ -1,0 +1,757 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JJCC Railways | Super Admin Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="stylesheet" href="admin-theme.css">
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+  <div class="brand">🚆 JJCC <span>RAILWAYS</span></div>
+  <p class="subtitle">SUPER ADMIN PORTAL</p>
+
+  <p class="menu-title">MAIN MENU</p>
+
+  <button class="menu-item active" type="button" data-view="overview">
+    ▦ Dashboard Overview
+  </button>
+
+  <button class="menu-item" type="button" data-view="users">
+    ♙ User Management
+  </button>
+
+  <button class="menu-item" type="button" data-view="admins">
+    ♜ Admin Management
+  </button>
+
+  <button class="menu-item" type="button" data-view="trains">
+    🚆 Train Operations
+  </button>
+  <p class="menu-title">OPERATIONS & FINANCE</p>
+  <a class="menu-item" href="fare-management.html">₱ Train Fare Management</a>
+  <a class="menu-item" href="finance.html">▤ Revenue & Transactions</a>
+  <a class="menu-item" href="payments.html">✓ Payment Approvals</a>
+  <a class="menu-item" href="passenger-payment-review.html">♙ Passenger Payment Review</a>
+  <a class="menu-item" href="discount-review.html">▧ Discount ID Verification</a>
+  <a class="menu-item" href="booking-change-review.html">↔ Booking Change Review</a>
+  <a class="menu-item" href="delay-requests.html">◷ Delay Compensation</a>
+
+  <a class="menu-item" href="bookings.html">
+    ▣ Bookings Management
+  </a>
+
+  <button class="logout" id="logoutButton">
+    ↪ Sign Out
+  </button>
+
+</aside>
+
+<main class="main">
+
+  <header class="topbar">
+    <div>
+      <h1 id="pageTitle">Dashboard Overview</h1>
+      <p id="pageSubtitle">
+        Welcome to JJCC Railways Super Administration.
+      </p>
+    </div>
+
+    <span class="admin-badge">♛ SUPER ADMIN</span>
+  </header>
+
+  <!-- OVERVIEW -->
+
+  <section class="page-section" id="overviewView">
+
+    <section class="cards">
+
+      <div class="card">
+        <p>Total Registered Accounts</p>
+        <h2 id="totalUsers">0</h2>
+        <small>All profiles</small>
+      </div>
+
+      <div class="card">
+        <p>Passenger Accounts</p>
+        <h2 id="totalPassengers">0</h2>
+        <small>Regular users</small>
+      </div>
+
+      <div class="card">
+        <p>Admin Accounts</p>
+        <h2 id="totalAdmins">0</h2>
+        <small>System administrators</small>
+      </div>
+
+    </section>
+
+    <section class="dashboard-grid" aria-label="Company operations metrics">
+      <a class="dashboard-card revenue" href="finance.html"><div class="card-top"><span>Net Revenue</span><span class="card-icon">₱</span></div><strong id="dashboardRevenue">—</strong><small>Confirmed paid bookings less recorded refunds</small></a>
+      <a class="dashboard-card bookings" href="bookings.html"><div class="card-top"><span>Total Bookings</span><span class="card-icon">▣</span></div><strong id="dashboardBookings">—</strong><small><span id="dashboardConfirmed">—</span> confirmed · <span id="dashboardCancelled">—</span> cancelled / expired</small></a>
+      <button class="dashboard-card trains" type="button" data-open-view="trains"><div class="card-top"><span>Train Fleet</span><span class="card-icon">🚆</span></div><strong id="dashboardTrains">—</strong><small><span id="dashboardActiveTrains">—</span> operational · <span id="dashboardBrokenTrains">—</span> broken</small></button>
+      <a class="dashboard-card pending" href="payments.html"><div class="card-top"><span>Pending Reviews</span><span class="card-icon">◷</span></div><strong id="dashboardPending">—</strong><small>Receipts, passenger IDs, changes and compensation</small></a>
+    </section>
+    <section class="dashboard-lower">
+      <div class="dashboard-panel"><h2>Revenue Overview</h2><p class="panel-caption">Net confirmed revenue by day · Last 7 days</p><div class="revenue-bars" id="revenueBars"><p class="panel-caption">Loading revenue history…</p></div><p class="panel-caption" style="margin:14px 0 0">Gross recorded payments: <strong id="dashboardGrossRevenue">—</strong> · Refunds: <strong id="dashboardRefunds">—</strong></p></div>
+      <div class="dashboard-panel"><h2>Booking Status</h2><p class="panel-caption">Current reservation distribution</p><div id="bookingStatusBreakdown"><p class="panel-caption">Loading booking status…</p></div><a class="dashboard-link" href="bookings.html">Manage bookings →</a></div>
+    </section>
+    <section class="dashboard-panel" style="margin-bottom:18px"><div class="panel-header"><div><h2>Recent JCoins Transactions</h2><p class="panel-caption">Latest recorded credits, debits and refunds</p></div><a class="dashboard-link" href="finance.html">Open finance ledger →</a></div><div class="dashboard-table-wrap"><table class="dashboard-table"><thead><tr><th>Date</th><th>Booking Ref</th><th>Transaction</th><th>Direction</th><th>Amount</th></tr></thead><tbody id="recentTransactions"><tr><td colspan="5">Loading transactions…</td></tr></tbody></table></div></section>
+    <p class="dashboard-data-status" id="dashboardDataStatus">Loading live dashboard data…</p>
+
+    <section class="panel">
+      <h2>Welcome, <span id="superAdminName">Super Admin</span></h2>
+
+      <p style="margin-top:10px;color:var(--muted);font-size:13px;line-height:1.7;">
+        Manage registered accounts, administrator roles, and train
+        reservations through the Super Admin portal.
+      </p>
+
+      <p class="status" id="statusMessage">
+        Connecting to Supabase...
+      </p>
+    </section>
+
+    <section class="quick-links">
+
+      <button class="quick-link" type="button" data-open-view="users">
+        <h3>User Management</h3>
+        <p>View registered passenger accounts and promote users to Admin.</p>
+        <span>OPEN USER MANAGEMENT →</span>
+      </button>
+
+      <button class="quick-link" type="button" data-open-view="admins">
+        <h3>Admin Management</h3>
+        <p>View administrator accounts and change their role back to User.</p>
+        <span>OPEN ADMIN MANAGEMENT →</span>
+      </button>
+
+      <a class="quick-link" href="delay-requests.html">
+        <h3>Delay Compensation</h3><p>Review passenger-reported arrival times, verify the actual train arrival, and approve or reject compensation requests. JCoins are credited only after approval.</p><span>REVIEW COMPENSATION REQUESTS →</span>
+      </a>
+
+      <div class="quick-link wide">
+        <h3>Payment &amp; Discount Review</h3>
+        <p>Review receipt uploads and discounted passenger IDs.</p>
+        <div class="link-row">
+          <a href="payments.html">Review payments →</a>
+          <a href="discount-review.html">Review discount IDs →</a>
+          <a href="passenger-payment-review.html">Review passenger payments →</a>
+          </div>
+      </div>
+      <a class="quick-link" href="booking-change-review.html">
+        <h3>Booking Change Review</h3><p>Review combined modification payments and approve or reject all requested changes together.</p><span>REVIEW BOOKING CHANGES →</span>
+      </a>
+
+      <button class="quick-link" type="button" data-open-view="trains">
+        <h3>Train Operations</h3>
+        <p>View all trains and update whether each train is active, broken, under maintenance, or out of service.</p>
+        <span>MANAGE TRAIN STATUS →</span>
+      </button>
+
+      <a class="quick-link" href="bookings.html">
+        <h3>Bookings Management</h3>
+        <p>See who booked a train, which train was selected, passenger details, and booking status.</p>
+        <span>VIEW ALL BOOKINGS →</span>
+      </a>
+
+    </section>
+
+  </section>
+
+  <!-- USER MANAGEMENT -->
+
+  <section class="page-section" id="usersView" hidden>
+
+    <section class="panel">
+
+      <div class="panel-header">
+        <h2>Registered Users</h2>
+
+        <div class="filters">
+          <input
+            type="search"
+            id="userSearch"
+            placeholder="Search user name..."
+          >
+
+          <button class="refresh-btn" id="refreshUsers" type="button">
+            ↻ Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Current Role</th>
+              <th>Date Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="usersTable">
+            <tr>
+              <td colspan="4">Loading users...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </section>
+
+  <!-- ADMIN MANAGEMENT -->
+
+  <section class="page-section" id="adminsView" hidden>
+
+    <section class="panel">
+
+      <div class="panel-header">
+        <h2>Administrator Accounts</h2>
+
+        <div class="filters">
+          <input
+            type="search"
+            id="adminSearch"
+            placeholder="Search admin name..."
+          >
+
+          <button class="refresh-btn" id="refreshAdmins" type="button">
+            ↻ Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Current Role</th>
+              <th>Date Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="adminsTable">
+            <tr>
+              <td colspan="4">Loading administrators...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="notice">
+        <strong>Security Notice:</strong>
+        Only the Super Admin can promote Users to Admin or demote Admins
+        back to Users. Super Admin accounts are protected.
+      </div>
+
+    </section>
+
+  </section>
+
+  <!-- TRAIN OPERATIONS -->
+  <section class="page-section" id="trainsView" hidden>
+    <section class="cards">
+      <div class="card"><p>Total Trains</p><h2 id="superTotalTrains">—</h2><small>Registered trains</small></div>
+      <div class="card"><p>Active Trains</p><h2 id="superActiveTrains">—</h2><small>Available for operation</small></div>
+      <div class="card"><p>Broken Trains</p><h2 id="superBrokenTrains">—</h2><small>Needs repair</small></div>
+      <div class="card"><p>Under Maintenance</p><h2 id="superMaintenanceTrains">—</h2><small>Currently being repaired</small></div>
+      <div class="card"><p>Out of Service</p><h2 id="superOutOfServiceTrains">—</h2><small>Not fit for operation</small></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Train Status Management</h2>
+          <p style="color:var(--muted);font-size:13px;">Monitor train conditions and update their operational status.</p>
+        </div>
+        <button class="refresh-btn" id="refreshTrains" type="button">↻ Refresh</button>
+      </div>
+      <p class="status" id="trainStatusMessage">Loading train records...</p>
+      <div id="superTrainStatusList"></div>
+    </section>
+  </section>
+
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  const SUPABASE_URL =
+    'https://ocjyyfzuoiprwajwyize.supabase.co';
+
+  const SUPABASE_KEY =
+    'sb_publishable_XZu8suOKCWB9Zp7dYhzxgQ_Yaq5zxo8';
+
+  const client = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const $ = selector => document.querySelector(selector);
+  const $$ = selector => [...document.querySelectorAll(selector)];
+
+  let accounts = [];
+
+  function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[char]);
+  }
+
+  function setStatus(message, isError = false) {
+    const element = $('#statusMessage');
+    if (!element) { console.error(message); return; }
+    element.textContent = message;
+    element.classList.toggle('error', isError);
+  }
+
+  function formatDate(value) {
+    if (!value) return 'N/A';
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return 'N/A';
+
+    return date.toLocaleDateString('en-PH', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+
+  function showView(viewName) {
+    const views = {
+      overview: {
+        element: $('#overviewView'),
+        title: 'Dashboard Overview',
+        subtitle: 'Welcome to JJCC Railways Super Administration.'
+      },
+      users: {
+        element: $('#usersView'),
+        title: 'User Management',
+        subtitle: 'View registered passenger accounts and manage their roles.'
+      },
+      admins: {
+        element: $('#adminsView'),
+        title: 'Admin Management',
+        subtitle: 'View administrator accounts and manage access.'
+      },
+      trains: {
+        element: $('#trainsView'),
+        title: 'Train Operations',
+        subtitle: 'Monitor train conditions and manage operational status.'
+      }
+    };
+
+    if (!views[viewName]) return;
+
+    Object.values(views).forEach(view => {
+      view.element.hidden = true;
+    });
+
+    views[viewName].element.hidden = false;
+
+    if ($('#pageTitle')) $('#pageTitle').textContent = views[viewName].title;
+    if ($('#pageSubtitle')) $('#pageSubtitle').textContent = views[viewName].subtitle;
+
+    $$('[data-view]').forEach(button => {
+      button.classList.toggle(
+        'active',
+        button.dataset.view === viewName
+      );
+    });
+
+    if (viewName === 'users') renderUsers();
+    if (viewName === 'admins') renderAdmins();
+    if (viewName === 'trains') loadTrains();
+  }
+
+  function updateStats() {
+    $('#totalUsers').textContent = accounts.length;
+
+    $('#totalPassengers').textContent =
+      accounts.filter(account => account.role === 'user').length;
+
+    $('#totalAdmins').textContent =
+      accounts.filter(account => account.role === 'admin').length;
+  }
+
+  function renderUsers() {
+    const search = $('#userSearch').value.trim().toLowerCase();
+
+    const users = accounts.filter(account => {
+      const name = String(account.full_name || '').toLowerCase();
+
+      return account.role === 'user' && name.includes(search);
+    });
+
+    const tbody = $('#usersTable');
+
+    if (users.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4">No user accounts found.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = users.map(account => `
+      <tr>
+        <td><strong>${escapeHTML(account.full_name || 'Unnamed User')}</strong></td>
+
+        <td>
+          <span class="role role-user">USER</span>
+        </td>
+
+        <td>${escapeHTML(formatDate(account.created_at))}</td>
+
+        <td>
+          <button
+            class="action-btn promote-btn"
+            type="button"
+            data-user-id="${escapeHTML(account.user_id)}"
+            data-new-role="admin"
+          >
+            Promote to Admin
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderAdmins() {
+    const search = $('#adminSearch').value.trim().toLowerCase();
+
+    const admins = accounts.filter(account => {
+      const name = String(account.full_name || '').toLowerCase();
+
+      return account.role === 'admin' && name.includes(search);
+    });
+
+    const tbody = $('#adminsTable');
+
+    if (admins.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4">No administrator accounts found.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = admins.map(account => `
+      <tr>
+        <td><strong>${escapeHTML(account.full_name || 'Unnamed Admin')}</strong></td>
+
+        <td>
+          <span class="role role-admin">ADMIN</span>
+        </td>
+
+        <td>${escapeHTML(formatDate(account.created_at))}</td>
+
+        <td>
+          <button
+            class="action-btn demote-btn"
+            type="button"
+            data-user-id="${escapeHTML(account.user_id)}"
+            data-new-role="user"
+          >
+            Demote to User
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderTrainStatuses(trainRows) {
+    $('#superTotalTrains').textContent = trainRows.length;
+    $('#superActiveTrains').textContent = trainRows.filter(train => train.train_status === 'active').length;
+    $('#superBrokenTrains').textContent = trainRows.filter(train => train.train_status === 'broken').length;
+    $('#superMaintenanceTrains').textContent = trainRows.filter(train => train.train_status === 'under_maintenance').length;
+    $('#superOutOfServiceTrains').textContent = trainRows.filter(train => train.train_status === 'out_of_service').length;
+
+    $('#superTrainStatusList').innerHTML = trainRows.map(train => `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;">
+        <span>
+          <strong>${escapeHTML(train.train_code || 'Train')} — ${escapeHTML(train.train_name || '')}</strong>
+          <small style="display:block;color:var(--muted);margin-top:4px;">Current status: ${escapeHTML(train.train_status || 'unknown')}</small>
+        </span>
+        <select data-super-train-status="${escapeHTML(train.train_id)}" style="padding:9px;border:1px solid var(--line);border-radius:6px;min-width:170px;">
+          <option value="active" ${train.train_status === 'active' ? 'selected' : ''}>Active / Operating</option>
+          <option value="broken" ${train.train_status === 'broken' ? 'selected' : ''}>Broken / Needs Repair</option>
+          <option value="under_maintenance" ${train.train_status === 'under_maintenance' ? 'selected' : ''}>Under Maintenance</option>
+          <option value="out_of_service" ${train.train_status === 'out_of_service' ? 'selected' : ''}>Out of Service</option>
+        </select>
+      </div>
+    `).join('') || '<p class="status">No train records found.</p>';
+  }
+
+  async function loadTrains() {
+    const status = $('#trainStatusMessage');
+    status.textContent = 'Loading train records...';
+    status.classList.remove('error');
+
+    try {
+      const { data, error } = await client
+        .from('trains')
+        .select('train_id, train_code, train_name, train_status')
+        .not('train_code', 'like', 'RTG-%')
+        .order('train_code');
+
+      if (error) throw error;
+
+      renderTrainStatuses(data || []);
+      status.textContent = 'Train records loaded. Changes are saved to the database.';
+    } catch (error) {
+      console.error('Load train records error:', error);
+      status.textContent = error.message || 'Unable to load train records.';
+      status.classList.add('error');
+      $('#superTrainStatusList').innerHTML = '';
+    }
+  }
+
+  async function loadAccounts() {
+    setStatus('Loading accounts...');
+
+    $('#usersTable').innerHTML =
+      '<tr><td colspan="4">Loading users...</td></tr>';
+
+    $('#adminsTable').innerHTML =
+      '<tr><td colspan="4">Loading administrators...</td></tr>';
+
+    try {
+      const { data, error } = await client
+        .from('profiles')
+        .select('user_id, full_name, role, created_at')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      accounts = data || [];
+
+      updateStats();
+      renderUsers();
+      renderAdmins();
+
+      setStatus(
+        'Successfully loaded ' + accounts.length + ' accounts.'
+      );
+
+    } catch (error) {
+      console.error('Load accounts error:', error);
+
+      setStatus(
+        error.message || 'Unable to load accounts.',
+        true
+      );
+
+      $('#usersTable').innerHTML =
+        '<tr><td colspan="4">Unable to load users.</td></tr>';
+
+      $('#adminsTable').innerHTML =
+        '<tr><td colspan="4">Unable to load administrators.</td></tr>';
+    }
+  }
+
+  async function changeUserRole(userId, newRole, button) {
+    const actionText =
+      newRole === 'admin'
+        ? 'promote this user to Admin'
+        : 'demote this Admin to User';
+
+    if (!confirm('Are you sure you want to ' + actionText + '?')) {
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Updating...';
+
+    try {
+      const { error } = await client.rpc('set_user_role', {
+        p_target_user_id: userId,
+        p_new_role: newRole
+      });
+
+      if (error) throw error;
+
+      await loadAccounts();
+
+      alert('Account role updated successfully.');
+
+    } catch (error) {
+      console.error('Role update error:', error);
+
+      alert(
+        error.message || 'Unable to update account role.'
+      );
+
+      button.disabled = false;
+
+      button.textContent =
+        newRole === 'admin'
+          ? 'Promote to Admin'
+          : 'Demote to User';
+    }
+  }
+
+  // Navigation buttons
+  $$('[data-view]').forEach(button => {
+    button.addEventListener('click', () => {
+      showView(button.dataset.view);
+    });
+  });
+
+  // Dashboard shortcut cards
+  $$('[data-open-view]').forEach(button => {
+    button.addEventListener('click', () => {
+      showView(button.dataset.openView);
+    });
+  });
+
+  // Search
+  $('#userSearch').addEventListener('input', renderUsers);
+  $('#adminSearch').addEventListener('input', renderAdmins);
+
+  // Refresh
+  $('#refreshUsers').addEventListener('click', loadAccounts);
+  $('#refreshAdmins').addEventListener('click', loadAccounts);
+  $('#refreshTrains').addEventListener('click', loadTrains);
+
+  $('#superTrainStatusList').addEventListener('change', async event => {
+    const select = event.target.closest('[data-super-train-status]');
+    if (!select) return;
+
+    const previousStatus = select.dataset.previousStatus || '';
+    select.disabled = true;
+    const status = $('#trainStatusMessage');
+    status.textContent = 'Saving train status...';
+    status.classList.remove('error');
+
+    try {
+      const { error } = await client.rpc('set_train_status', {
+        p_train_id: Number(select.dataset.superTrainStatus),
+        p_status: select.value
+      });
+      if (error) throw error;
+
+      await loadTrains();
+      status.textContent = 'Train status updated successfully.';
+    } catch (error) {
+      console.error('Update train status error:', error);
+      status.textContent = error.message || 'Unable to update train status.';
+      status.classList.add('error');
+      await loadTrains();
+    } finally {
+      select.disabled = false;
+    }
+  });
+
+  // Role management actions
+  document.addEventListener('click', event => {
+    const button = event.target.closest('[data-user-id][data-new-role]');
+
+    if (!button) return;
+
+    changeUserRole(
+      button.dataset.userId,
+      button.dataset.newRole,
+      button
+    );
+  });
+
+  // Sign out
+  $('#logoutButton').addEventListener('click', async () => {
+    const button = $('#logoutButton');
+
+    button.disabled = true;
+    button.textContent = 'Signing out...';
+
+    const { error } = await client.auth.signOut();
+
+    if (error) {
+      setStatus(error.message, true);
+      button.disabled = false;
+      button.textContent = '↪ Sign Out';
+      return;
+    }
+
+    window.location.replace('index.html');
+  });
+
+  // Verify Super Admin and load dashboard
+  async function initialize() {
+    try {
+      const { data: authData, error: authError } =
+        await client.auth.getUser();
+
+      if (authError) throw authError;
+
+      if (!authData.user) {
+        window.location.replace('index.html');
+        return;
+      }
+
+      const { data: role, error: roleError } =
+        await client.rpc('current_user_role');
+
+      if (roleError) throw roleError;
+
+      if (role !== 'super_admin') {
+        window.location.replace(
+          role === 'admin' ? 'admin.html' : 'book.html'
+        );
+        return;
+      }
+
+      const { data: profile, error: profileError } =
+        await client
+          .from('profiles')
+          .select('user_id, full_name, role')
+          .eq('user_id', authData.user.id)
+          .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      $('#superAdminName').textContent =
+        profile?.full_name || authData.user.email || 'Super Admin';
+
+      await loadAccounts();
+      await loadTrains();
+      const requestedView = location.hash.replace('#','');
+      if (['users','admins','trains'].includes(requestedView)) showView(requestedView);
+
+    } catch (error) {
+      console.error('Super Admin verification error:', error);
+      setStatus(error.message || 'Unable to verify Super Admin.', true);
+    }
+  }
+
+  initialize();
+})();
+</script>
+
+<script src="staff-dashboard.js"></script>
+<script src="staff-notifications.js"></script>
+<script src="staff-shell.js"></script>
+</body>
+</html>

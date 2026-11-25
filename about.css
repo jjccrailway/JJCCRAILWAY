@@ -1,0 +1,17 @@
+/* About page presentation */
+.legal-page.about-page { text-align: justify; }
+.about-page .about-hero,
+.about-page .developers-section { width: min(900px, 100%); margin-left: auto; margin-right: auto; }
+.about-page .about-hero { margin-bottom: 24px; }
+.about-page .about-hero p,
+.about-page .value-card p,
+.about-page .developers-section > .page-sub,
+.about-page .developer-card p { text-align: justify; }
+.about-values { width: min(900px, 100%); margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 18px; }
+.value-card { background: #fff; border: 1px solid var(--line, #dedbd3); border-radius: 18px; padding: 28px 32px; color: var(--ink, #172440); line-height: 1.8; }
+.value-card h2 { margin: 0 0 12px; color: var(--navy, #102044); font-size: 20px; text-align: justify; }
+.value-card p { margin: 0; text-align: justify; }
+.about-page .developers-section { margin-top: 54px; }
+/* Keep each developer role centered beneath the name. */
+.about-page .developer-card p { text-align: center; }
+@media (max-width: 600px) { .value-card { padding: 22px 20px; border-radius: 14px; } .about-values { gap: 14px; } }

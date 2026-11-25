@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Delay Compensation Requests | JJCC Railways</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{--navy:#14234f;--gold:#c9831b;--paper:#f3f1ec;--ink:#14234f;--muted:#5d6475;--line:#ddd7ca}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Arial,sans-serif}
+    .wrap{max-width:1200px;margin:0 auto;padding:32px 22px}.head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+    h1{margin:0;font-size:26px}.sub{color:var(--muted);font-size:14px;margin-top:7px}
+    .nav a{color:var(--navy);margin-right:14px;font-size:13px;font-weight:700;text-decoration:none}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:18px}
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px}
+    select,input{padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+    button{border:0;border-radius:7px;padding:10px 14px;font-weight:700;cursor:pointer}
+    button:disabled{opacity:.5;cursor:not-allowed}.approve{background:#176b35;color:white}.reject{background:#a62b2b;color:white}.refresh{background:var(--navy);color:#fff}
+    .item{border:1px solid var(--line);border-radius:9px;padding:17px;margin:12px 0;display:grid;grid-template-columns:1fr auto;gap:15px}
+    .meta{color:var(--muted);font-size:13px;line-height:1.7;margin-top:6px}.amount{font-weight:800;color:var(--navy);font-size:18px}
+    .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.note{width:100%;max-width:280px}
+    .status{padding:12px;border-radius:8px;background:#f3f5f9;color:var(--ink);font-size:13px;white-space:pre-line}.empty{padding:22px;text-align:center;color:var(--muted)}
+    @media(max-width:700px){.item{grid-template-columns:1fr}.actions{align-items:stretch}.note{max-width:none;width:100%}}
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-theme.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="head">
+    <div><h1>Delay Compensation Requests</h1><p class="sub">Review passenger-reported arrival times, enter the verified actual arrival, then approve or reject the claim.</p></div>
+    <nav class="nav"><a id="dashboardLink" href="admin.html">Dashboard</a></nav>
+  </header>
+  <section class="panel">
+    <div class="toolbar">
+      <label for="filter">Status</label>
+      <select id="filter"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select>
+      <button class="refresh" id="refresh">Refresh</button>
+    </div>
+    <div id="status" class="status">Checking staff access…</div>
+    <div id="requests"></div>
+  </section>
+</main>
+<script>
+(() => {
+  const client=window.supabase.createClient('https://ocjyyfzuoiprwajwyize.supabase.co','sb_publishable_XZu8suOKCWB9Zp7dYhzxgQ_Yaq5zxo8');
+  const $=s=>document.querySelector(s);
+  const status=(m)=>$('#status').textContent=m;
+  const money=n=>'₱'+Number(n||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+  async function init(){
+    try{
+      const {data:auth,error:authErr}=await client.auth.getUser();if(authErr)throw authErr;
+      if(!auth.user){location.replace('index.html');return;}
+      const {data:role,error:roleErr}=await client.rpc('current_user_role');if(roleErr)throw roleErr;
+      if(!['admin','super_admin'].includes(role)){location.replace('book.html');return;}
+      $('#dashboardLink').href=role==='super_admin'?'superadmin.html':'admin.html';
+      await load();
+    }catch(e){console.error(e);status(e.message||'Unable to verify staff access.');}
+  }
+  async function load(){
+    status('Loading compensation requests…');$('#requests').innerHTML='';
+    const filter=$('#filter').value;
+    let q=client.from('delay_compensation_requests').select('request_id,booking_id,user_id,booking_reference,original_fare,compensation_percent,compensation_amount,request_status,requested_at,admin_note,scheduled_arrival_at,reported_arrival_at,reported_delay_minutes,verified_actual_arrival_at').order('requested_at',{ascending:false});
+    if(filter!=='all')q=q.eq('request_status',filter);
+    const {data,error}=await q;if(error)throw error;
+    if(!data?.length){status('No '+(filter==='all'?'':filter+' ')+'requests found.');return;}
+    status(data.length+' request(s) loaded.');
+    $('#requests').innerHTML=data.map(r=>`<article class="item" data-id="${r.request_id}">
+      <div><strong>${r.booking_reference}</strong><div class="meta">Passenger ID: ${r.user_id}<br>Booking ID: ${r.booking_id}<br>Original fare: ${money(r.original_fare)}<br>Scheduled arrival: ${r.scheduled_arrival_at ? new Date(r.scheduled_arrival_at).toLocaleString() : 'Not recorded'}<br>Passenger-reported actual arrival: <b>${r.reported_arrival_at ? new Date(r.reported_arrival_at).toLocaleString() : 'Not provided'}</b><br>Passenger-reported delay estimate: ${r.reported_delay_minutes ?? '—'} minute(s)<br>Submitted: ${new Date(r.requested_at).toLocaleString()}<br>Status: <b>${r.request_status.toUpperCase()}</b>${r.verified_actual_arrival_at?'<br>Admin-verified actual arrival: '+new Date(r.verified_actual_arrival_at).toLocaleString():''}${r.admin_note?'<br>Admin note: '+String(r.admin_note).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])):''}</div></div>
+      <div><div class="amount">${Number(r.compensation_amount||0).toFixed(2)} JCoins <small>(estimated until verified)</small></div>${r.request_status==='pending'?`<div class="actions"><label style="width:100%;font-size:12px">Verified actual arrival (required to approve)<input class="verified-arrival" type="datetime-local" value="${r.reported_arrival_at ? new Date(new Date(r.reported_arrival_at).getTime()-new Date(r.reported_arrival_at).getTimezoneOffset()*60000).toISOString().slice(0,16) : ''}" style="display:block;width:100%;margin:6px 0"></label><input class="note" maxlength="500" placeholder="Optional admin note"><button class="approve" data-decision="approved">Verify &amp; approve</button><button class="reject" data-decision="rejected">Reject</button></div>`:''}</div>
+    </article>`).join('');
+    $('#requests').querySelectorAll('button[data-decision]').forEach(btn=>btn.addEventListener('click',()=>review(btn)));
+  }
+  async function review(btn){
+    const card=btn.closest('.item'),id=Number(card.dataset.id),decision=btn.dataset.decision,note=card.querySelector('.note')?.value||'';
+    if(!confirm(`${decision==='approved'?'Approve and credit':'Reject'} this delay compensation request?`))return;
+    card.querySelectorAll('button').forEach(b=>b.disabled=true);
+    try{
+      const verifiedValue=card.querySelector('.verified-arrival')?.value||'';
+      if(decision==='approved'&&!verifiedValue){throw new Error('Enter the verified actual arrival date and time before approving.');}
+      const verifiedAt=verifiedValue?new Date(verifiedValue).toISOString():null;
+      const {data,error}=await client.rpc('review_delay_compensation_request',{p_request_id:id,p_decision:decision,p_verified_actual_arrival_at:verifiedAt,p_admin_note:note});
+      if(error)throw error;
+      status(decision==='approved'?`${data.amount} JCoins credited successfully.`:'Request rejected. No JCoins were credited.');
+      await load();
+    }catch(e){console.error(e);status(e.message||'Unable to review request.');card.querySelectorAll('button').forEach(b=>b.disabled=false);}
+  }
+  $('#refresh').addEventListener('click',()=>load().catch(e=>status(e.message)));
+  $('#filter').addEventListener('change',()=>load().catch(e=>status(e.message)));
+  init();
+})();
+</script>
+<script src="staff-shell.js"></script>
+</body>
+</html>

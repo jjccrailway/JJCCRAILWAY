@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Travel Information &amp; Policies | JJCC Railways</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Oswald:wght@600;700&family=Playfair+Display:wght@700&family=Yellowtail&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="policy" data-active="policy">
+  <div id="site-header"></div>
+
+  <main class="wrap wrap-xs section">
+    <h1 class="page-title">Travel Information &amp; Policies</h1>
+    <p class="page-sub" style="margin-bottom:20px">Booking, payment, refunds, delay compensation and passenger guidelines for JJCC Railways</p>
+
+    <div class="pchips" role="group" aria-label="Jump to a section">
+      <button class="pchip" data-target="booking-payments">&#128179; Booking &amp; Payments</button>
+      <button class="pchip" data-target="refund-policy">&#128176; Refunds</button>
+      <button class="pchip" data-target="delay-policy">&#9201; Delay Compensation</button>
+      <button class="pchip" data-target="receipt-policy">&#128196; Payment Receipt</button>
+      <button class="pchip" data-target="changes-policy">&#128260; Booking Changes</button>
+      <button class="pchip" data-target="baggage">&#129523; Baggage</button>
+      <button class="pchip" data-target="oversized">&#128230; Oversized</button>
+      <button class="pchip" data-target="idreq">&#127915; ID</button>
+      <button class="pchip" data-target="animals">&#128062; Animals</button>
+      <button class="pchip" data-target="access">&#9855; Accessibility</button>
+      <button class="pchip" data-target="conduct">&#128203; Code</button>
+    </div>
+
+
+    <div class="acc" id="booking-payments">
+      <button class="acc-btn" aria-expanded="false"><span class="ai">&#128179;</span>Booking &amp; Payments<span class="chev">&#8964;</span></button>
+      <div class="acc-body" hidden>
+        <ul>
+          <li>Regular passenger bookings are held for 10 minutes while the passenger completes payment and uploads a receipt.</li>
+          <li>Student, Senior Citizen, and PWD discount claims require a valid ID upload and administrator verification. Seats remain reserved while ID verification is pending; there is no automatic ID-review expiry.</li>
+          <li>After a discount ID is approved, the passenger receives an in-app notification and has 10 minutes from notification time to upload the payment receipt.</li>
+          <li>If a discount ID is rejected, the passenger is automatically changed to Regular (no discount), and the 10-minute payment countdown starts when the rejection notification is received.</li>
+          <li>A booking is confirmed only after the submitted payment receipt has been reviewed and approved.</li>
+          <li>Payment receipt review is a manual verification step. Uploading a receipt alone does not confirm that funds have been received.</li>
+          <li>JCoins are valued at 1 JCoin = PHP 1. JCoins are credited to your account wallet and are not redeemable for cash.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc" id="refund-policy">
+      <button class="acc-btn" aria-expanded="false"><span class="ai">&#128176;</span>Cancellation &amp; Refund Policy<span class="chev">&#8964;</span></button>
+      <div class="acc-body" hidden>
+        <ul>
+          <li>Voluntary cancellation is available within 24 hours after payment confirmation. The 24-hour period starts from the booking's payment approval timestamp, not from booking creation.</li>
+          <li>Eligible voluntary cancellations receive 50% of the original ticket fare as JCoins.</li>
+          <li>The booking is cancelled immediately and the refund is credited to the passenger's JCoins Wallet automatically. No administrator approval is required.</li>
+          <li>After the 24-hour window, voluntary cancellation with a refund is not available.</li>
+          <li>If JJCC Railways cancels a confirmed journey, 100% of the original ticket fare is credited to the passenger's JCoins Wallet.</li>
+          <li>JCoins cannot be withdrawn or exchanged for cash. JCoins do not expire.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc" id="delay-policy">
+      <button class="acc-btn" aria-expanded="false"><span class="ai">&#9201;</span>Delay Compensation<span class="chev">&#8964;</span></button>
+      <div class="acc-body" hidden>
+        <p>Delay is measured by comparing the verified actual arrival time at the passenger's destination with the scheduled arrival time.</p>
+        <ul>
+          <li>Below 30 minutes: no compensation.</li>
+          <li>30–59 minutes: 25% of the original ticket fare.</li>
+          <li>60–119 minutes: 50% of the original ticket fare.</li>
+          <li>120 minutes or more: 100% of the original ticket fare.</li>
+          <li>Passengers may submit an optional Delay Compensation Request and enter the actual arrival date and time they experienced.</li>
+          <li>An Admin or Super Admin verifies the passenger-reported arrival time, then approves or rejects each request.</li>
+          <li>JCoins are credited to the passenger's wallet only after Admin approval. Recording a delay alone does not issue compensation.</li>
+          <li>Only one compensation request is allowed per booking. The passenger-reported time is not treated as verified until Admin review.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc" id="receipt-policy">
+      <button class="acc-btn" aria-expanded="false"><span class="ai">&#128196;</span>Payment Receipt Deadline<span class="chev">&#8964;</span></button>
+      <div class="acc-body" hidden>
+        <ul>
+          <li>Regular passengers must upload their payment receipt within 10 minutes after booking creation.</li>
+          <li>Discounted passengers do not have a payment countdown while their ID is pending verification. If approved, their 10-minute countdown starts when the approval notification is sent. If rejected, the passenger becomes Regular and the 10-minute countdown starts when the rejection notification is sent.</li>
+          <li>If no receipt is submitted before an individual passenger’s deadline, only that passenger’s seat is released. Other passengers in the same booking remain reserved.</li>
+          <li>If a receipt is submitted on time, the payment remains pending review until an Admin or Super Admin reviews it. An administrator review delay does not expire or cancel a submitted payment or release that passenger’s seat.</li>
+          <li>If a submitted receipt is rejected, any JCoins used for that passenger are returned and a new 10-minute receipt upload window starts when the rejection notification is sent.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc" id="changes-policy">
+      <button class="acc-btn" aria-expanded="false"><span class="ai">&#128260;</span>Booking Changes &amp; Fare Types<span class="chev">&#8964;</span></button>
+      <div class="acc-body" hidden>
+        <ul>
+          <li>Flexible fares can be changed without a change fee before departure, subject to availability and any fare difference.</li>
+          <li>Saver fares may require a change fee and any fare difference.</li>
+          <li>Each booking is eligible for one combined modification request under the booking-change rules.</li>
+          <li>Any modification fee is non-refundable. A change is not complete until the required payment and review steps have been completed.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc" id="baggage">
+      <button class="acc-btn" aria-expanded="false"><span class="ai">&#129523;</span>Baggage Allowances<span class="chev">&#8964;</span></button>
+      <div class="acc-body" hidden>
+        <ul>
+          <li>Each passenger may bring one large bag (up to 23 kg) and one carry-on bag (up to 7 kg).</li>
+          <li>Keep your bags with you, or store them in the luggage racks at the end of each coach.</li>
+          <li>Extra bags may be carried subject to space and a small handling fee at the station.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc" id="oversized">
+      <button class="acc-btn" aria-expanded="false"><span class="ai">&#128230;</span>Oversized &amp; Special Items<span class="chev">&#8964;</span></button>
+      <div class="acc-body" hidden>
+        <ul>
+          <li>Folded bicycles are carried free. Full-size bicycles need a reservation on services with bike space.</li>
+          <li>Sports equipment, musical instruments and similar items must fit in the luggage area without blocking aisles.</li>
+          <li>Items heavier than 30 kg or longer than 1.5 m may not be carried.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc" id="idreq">
+      <button class="acc-btn" aria-expanded="false"><span class="ai">&#127915;</span>ID &amp; Ticket Requirements<span class="chev">&#8964;</span></button>
+      <div class="acc-body" hidden>
+        <ul>
+          <li>Carry a valid government-issued ID. The name on your ticket must match your ID.</li>
+          <li>Student, Senior Citizen, and PWD passengers receive a 20% discount only after their uploaded matching ID is approved by an Admin or Super Admin. Accepted upload formats are JPG, JPEG, PNG, WEBP, and PDF (maximum 5 MB).</li>
+          <li>If a discount ID is rejected, the passenger type automatically changes to Regular and the fare is recalculated without the discount.</li>
+          <li>Show your e-ticket on your phone or as a printout. Keep it until you leave the destination station.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc" id="animals">
+      <button class="acc-btn" aria-expanded="false"><span class="ai">&#128062;</span>Animals &amp; Pets<span class="chev">&#8964;</span></button>
+      <div class="acc-body" hidden>
+        <ul>
+          <li>Small pets travel free in a secure, ventilated carrier that stays on your lap or under your seat.</li>
+          <li>Guide and assistance dogs travel free and may sit with their handler on all services.</li>
+          <li>Pets may not occupy seats. Passengers are responsible for their animals at all times.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc" id="access">
+      <button class="acc-btn" aria-expanded="false"><span class="ai">&#9855;</span>Accessibility &amp; Assistance<span class="chev">&#8964;</span></button>
+      <div class="acc-body" hidden>
+        <ul>
+          <li>Request boarding assistance at least 24 hours before travel through Customer Service.</li>
+          <li>Wheelchair spaces and priority seats are available in designated coaches.</li>
+          <li>Station staff can help with boarding, alighting and transfers at all JJCC stations.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc" id="conduct">
+      <button class="acc-btn" aria-expanded="false"><span class="ai">&#128203;</span>Code of Conduct<span class="chev">&#8964;</span></button>
+      <div class="acc-body" hidden>
+        <ul>
+          <li>Be considerate: keep noise low, and give priority seats to those who need them.</li>
+          <li>Smoking and vaping are not allowed on trains or in enclosed station areas.</li>
+          <li>Dangerous or prohibited items are not allowed. Staff may ask passengers to leave if safety is at risk.</li>
+        </ul>
+      </div>
+    </div>
+
+
+  </main>
+
+  <div id="site-footer"></div>
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+  <script src="php-api.js"></script>
+</body>
+</html>

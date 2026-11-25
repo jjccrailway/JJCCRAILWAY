@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Train Fare Management | JJCC Railways</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="admin-theme.css">
+<style>
+main{max-width:none;margin:0;padding:32px 34px 48px}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin:18px 0}.muted{color:var(--muted)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.toolbar input,.toolbar select{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+.fare-group{margin:18px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden}.fare-group h3{padding:13px 16px;background:#f5f7fb;font:600 17px Oswald,Inter,sans-serif}
+.fare-row{display:grid;grid-template-columns:minmax(220px,1.5fr) minmax(130px,1fr) 150px 100px;gap:12px;align-items:center;padding:13px 16px;border-top:1px solid var(--line)}
+.fare-row input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit}
+button{font:inherit;padding:10px 14px;border:0;border-radius:8px;background:var(--navy);color:#fff;font-weight:700;cursor:pointer}
+button.save{background:#16794a}button:disabled{opacity:.55;cursor:wait}
+.status{padding:12px;background:#e8f3ec;border-radius:8px;margin:12px 0;color:var(--ok);font-size:13px}.status.error{background:#fdecea;color:var(--bad)}
+@media(max-width:760px){main{padding:20px 14px}.fare-row{grid-template-columns:1fr 1fr}.fare-row .segment{grid-column:1/-1}}
+</style></head><body>
+<header style="padding:24px 5%;background:var(--navy);color:white"><div><h1 style="font:600 28px Oswald,Inter,sans-serif">Train Fare Management</h1><p style="color:#c3cee6">Update route segment fares for future reservations.</p></div></header>
+<main><section class="panel"><h2>Fare rules</h2><p class="muted">Changes apply to new reservations only. Existing bookings keep their saved total_fare and are not repriced. Each fare is the segment amount from the previous station to the displayed station.</p>
+<div class="toolbar"><input id="search" type="search" placeholder="Search train or station…" aria-label="Search train or station"><button id="refresh" type="button">Refresh</button></div>
+<div id="message" class="status" role="status">Loading route fares…</div><div id="fareRows"></div></section></main>
+<script>
+(()=>{'use strict';
+const db=window.supabase.createClient('https://ocjyyfzuoiprwajwyize.supabase.co','sb_publishable_XZu8suOKCWB9Zp7dYhzxgQ_Yaq5zxo8');
+const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'₱'+Number(n||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+let rows=[];
+function message(t,error=false){const el=$('#message');if(!el)return;el.textContent=t;el.className='status'+(error?' error':'')}
+async function load(){message('Loading route fares…');const {data,error}=await db.rpc('get_staff_train_fares');if(error)throw error;rows=data||[];render();message(`Loaded ${rows.length} route segments. Fare updates apply to new reservations only.`)}
+function render(){const term=$('#search').value.trim().toLowerCase();const filtered=rows.filter(x=>[x.train_code,x.train_name,x.station_name,x.previous_station_name].join(' ').toLowerCase().includes(term));const groups=new Map();filtered.forEach(x=>{const key=`${x.train_code||'Train'} · ${x.train_name||''}`;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(x)});
+$('#fareRows').innerHTML=[...groups.entries()].map(([name,list])=>`<section class="fare-group"><h3>${esc(name)}</h3>${list.map(x=>`<div class="fare-row"><strong class="segment">${esc(x.previous_station_name||'Origin')} → ${esc(x.station_name||'Station')}</strong><span class="muted">Stop ${esc(x.stop_order)}</span><label><span class="muted">Fare</span><input type="number" min="0" max="100000" step=".01" data-fare="${x.train_id}:${x.station_id}" value="${Number(x.fare_from_previous||0).toFixed(2)}" aria-label="Fare for ${esc(x.train_code)} to ${esc(x.station_name)}"></label><button class="save" data-save="${x.train_id}:${x.station_id}" type="button">Save</button></div>`).join('')}</section>`).join('')||'<p class="muted">No matching route segments found.</p>'}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-save]');if(!b)return;const key=b.dataset.save,[trainId,stationId]=key.split(':').map(Number),input=document.querySelector(`[data-fare="${key}"]`),value=Number(input?.value);if(!Number.isFinite(value)||value<0||value>100000){message('Enter a valid fare from ₱0 to ₱100,000.',true);return}b.disabled=true;try{const {data,error}=await db.rpc('update_staff_train_fare',{p_train_id:trainId,p_station_id:stationId,p_fare:value});if(error)throw error;if(!data?.success)throw new Error('Fare update was not confirmed.');const row=rows.find(x=>Number(x.train_id)===trainId&&Number(x.station_id)===stationId);if(row)row.fare_from_previous=value;message(`Updated ${row?.train_code||'train'} · ${row?.previous_station_name||'Origin'} → ${row?.station_name||'station'} to ${money(value)}. Existing bookings were not changed.`)}catch(err){message(err.message||'Unable to save fare.',true)}finally{b.disabled=false}});
+$('#search').addEventListener('input',render);$('#refresh').addEventListener('click',()=>load().catch(e=>message(e.message,true)));
+(async()=>{try{const {data:{user},error}=await db.auth.getUser();if(error)throw error;if(!user){location.replace('index.html');return}const {data:role,error:roleError}=await db.rpc('current_user_role');if(roleError)throw roleError;if(!['admin','super_admin'].includes(role)){location.replace('book.html');return}await load()}catch(e){message(e.message||'Unable to load fare records.',true)}})();
+})();</script><script src="staff-shell.js"></script></body></html>

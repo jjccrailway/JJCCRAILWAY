@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JJCC Railways | Admin Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="stylesheet" href="admin-theme.css">
+</head>
+
+<body>
+
+<aside class="sidebar">
+  <div class="brand">🚆 JJCC <span>RAILWAYS</span></div>
+  <p class="subtitle">ADMIN PORTAL</p>
+  <p class="menu-title">OVERVIEW</p>
+  <a class="menu-item active" href="admin.html">▦ Dashboard Overview</a>
+  <p class="menu-title">OPERATIONS</p>
+  <a class="menu-item" href="bookings.html">▣ Bookings Management</a>
+  <a class="menu-item" href="#trainOperations">🚆 Train Operations</a>
+  <a class="menu-item" href="fare-management.html">₱ Train Fare Management</a>
+  <p class="menu-title">FINANCE &amp; REVIEWS</p>
+  <a class="menu-item" href="finance.html">▤ Revenue &amp; Transactions</a>
+  <a class="menu-item" href="payments.html">✓ Payment Approvals</a>
+  <a class="menu-item" href="passenger-payment-review.html">♙ Passenger Payment Review</a>
+  <a class="menu-item" href="discount-review.html">▧ Discount ID Verification</a>
+  <a class="menu-item" href="booking-change-review.html">↔ Booking Change Review</a>
+  <a class="menu-item" href="delay-requests.html">◷ Delay Compensation</a>
+  <button class="logout" id="logoutButton">↪ Sign Out</button>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div><h1>Dashboard Overview</h1><p>Company performance and railway operations at a glance.</p></div>
+    <div style="display:flex;align-items:center;gap:12px"><span class="admin-badge">♜ ADMIN</span><button class="refresh-btn" id="refreshDashboard" type="button">↻ Refresh</button></div>
+  </header>
+  <p class="dashboard-data-status" id="dashboardDataStatus">Loading live dashboard data…</p>
+
+  <section class="dashboard-grid" aria-label="Key company metrics">
+    <a class="dashboard-card revenue" href="finance.html"><div class="card-top"><span>Net Revenue</span><span class="card-icon">₱</span></div><strong id="dashboardRevenue">—</strong><small>Confirmed paid bookings less recorded refunds</small></a>
+    <a class="dashboard-card bookings" href="bookings.html"><div class="card-top"><span>Total Bookings</span><span class="card-icon">▣</span></div><strong id="totalBookings">—</strong><small><span id="confirmedBookings">—</span> confirmed · <span id="cancelledBookings">—</span> cancelled / expired</small></a>
+    <a class="dashboard-card trains" href="#trainOperations"><div class="card-top"><span>Train Fleet</span><span class="card-icon">🚆</span></div><strong id="totalTrains">—</strong><small><span id="activeTrains">—</span> operational · <span id="brokenTrains">—</span> broken</small></a>
+    <a class="dashboard-card pending" href="payments.html"><div class="card-top"><span>Pending Reviews</span><span class="card-icon">◷</span></div><strong id="dashboardPending">—</strong><small>Receipts, passenger IDs, changes and compensation</small></a>
+  </section>
+
+  <section class="dashboard-lower">
+    <div class="dashboard-panel"><h2>Revenue Overview</h2><p class="panel-caption">Net confirmed revenue by day · Last 7 days</p><div class="revenue-bars" id="revenueBars"><p class="panel-caption">Loading revenue history…</p></div><p class="panel-caption" style="margin:14px 0 0">Gross recorded payments: <strong id="dashboardGrossRevenue">—</strong> · Refunds: <strong id="dashboardRefunds">—</strong></p></div>
+    <div class="dashboard-panel"><h2>Booking Status</h2><p class="panel-caption">Current reservation distribution</p><div id="bookingStatusBreakdown"><p class="panel-caption">Loading booking status…</p></div><a class="dashboard-link" href="bookings.html">Manage bookings →</a></div>
+  </section>
+
+  <section class="dashboard-panel" style="margin-bottom:18px"><div class="panel-header"><div><h2>Recent JCoins Transactions</h2><p class="panel-caption">Latest recorded credits, debits and refunds</p></div><a class="dashboard-link" href="finance.html">Open finance ledger →</a></div><div class="dashboard-table-wrap"><table class="dashboard-table"><thead><tr><th>Date</th><th>Booking Ref</th><th>Transaction</th><th>Direction</th><th>Amount</th></tr></thead><tbody id="recentTransactions"><tr><td colspan="5">Loading transactions…</td></tr></tbody></table></div></section>
+
+  <section class="dashboard-panel" id="trainOperations" style="margin-bottom:18px"><h2>Train Operations</h2><p class="panel-caption">Operational condition summary and quick status controls</p><div class="dashboard-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));margin:14px 0 0"><div class="dashboard-card"><div class="card-top">Active</div><strong id="dashboardActiveTrains">—</strong><small>Ready for service</small></div><div class="dashboard-card"><div class="card-top">Broken</div><strong id="dashboardBrokenTrains">—</strong><small>Requires repair</small></div><div class="dashboard-card"><div class="card-top">Maintenance</div><strong id="dashboardMaintenanceTrains">—</strong><small>Under maintenance</small></div><div class="dashboard-card"><div class="card-top">Out of Service</div><strong id="dashboardOutTrains">—</strong><small>Not operating</small></div></div><div id="trainStatusList" class="status">Loading train records…</div></section>
+
+  <section class="panel"><h2>Administrator Information</h2><p>Signed in as: <strong id="adminName">Loading...</strong></p><p id="statusMessage" class="status">Checking account access...</p></section>
+</main>
+<script>
+(() => {
+  'use strict';
+
+  const SUPABASE_URL =
+    'https://ocjyyfzuoiprwajwyize.supabase.co';
+
+  const SUPABASE_KEY =
+    'sb_publishable_XZu8suOKCWB9Zp7dYhzxgQ_Yaq5zxo8';
+
+  const client = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const $ = selector => document.querySelector(selector);
+  const setText = (selector, value) => { const node = $(selector); if (node) node.textContent = value; };
+
+  function showError(message) {
+    const status = $('#statusMessage');
+    if (!status) { console.error(message); return; }
+    status.textContent = message;
+    status.classList.add('error');
+  }
+
+  async function loadDashboard() {
+    try {
+      const { data: authData, error: authError } =
+        await client.auth.getUser();
+
+      if (authError) throw authError;
+
+      if (!authData.user) {
+        window.location.replace('index.html');
+        return;
+      }
+
+      const { data: role, error: roleError } =
+        await client.rpc('current_user_role');
+
+      if (roleError) throw roleError;
+
+      if (role !== 'admin') {
+        window.location.replace(
+          role === 'super_admin' ? 'superadmin.html' : 'book.html'
+        );
+        return;
+      }
+
+      const { data: profile, error: profileError } =
+        await client
+          .from('profiles')
+          .select('user_id, full_name, role')
+          .eq('user_id', authData.user.id)
+          .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      setText('#adminName', profile?.full_name || authData.user.email || 'Admin');
+
+      const { data: records, error: bookingsError } =
+        await client.rpc('get_staff_booking_records');
+
+      if (bookingsError) throw bookingsError;
+
+      const bookings = (records || []).map(item =>
+        item.booking || item
+      );
+
+      setText('#totalBookings', bookings.length);
+
+      setText('#confirmedBookings',
+        bookings.filter(item =>
+          String(item.booking_status).toLowerCase() === 'confirmed'
+        ).length);
+
+      setText('#cancelledBookings',
+        bookings.filter(item =>
+          String(item.booking_status).toLowerCase() === 'cancelled'
+        ).length);
+
+      const { data: trains, error: trainsError } = await client.from('trains').select('train_id, train_code, train_name, train_status').not('train_code', 'like', 'RTG-%').order('train_code');
+      if (trainsError) throw trainsError;
+      const trainRows = trains || [];
+      setText('#totalTrains', trainRows.length);
+      setText('#activeTrains', trainRows.filter(x => x.train_status === 'active').length);
+      setText('#brokenTrains', trainRows.filter(x => x.train_status === 'broken').length);
+      setText('#maintenanceTrains', trainRows.filter(x => x.train_status === 'under_maintenance').length);
+      setText('#outOfServiceTrains', trainRows.filter(x => x.train_status === 'out_of_service').length);
+      const trainList = $('#trainStatusList');
+      if (trainList) trainList.innerHTML = trainRows.map(train => `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;"><span><strong>${String(train.train_code||'Train')} — ${String(train.train_name||'')}</strong></span><select data-train-status="${train.train_id}" style="padding:8px;border:1px solid var(--line);border-radius:6px;"><option value="active" ${train.train_status==='active'?'selected':''}>Active / Operating</option><option value="broken" ${train.train_status==='broken'?'selected':''}>Broken / Needs Repair</option><option value="under_maintenance" ${train.train_status==='under_maintenance'?'selected':''}>Under Maintenance</option><option value="out_of_service" ${train.train_status==='out_of_service'?'selected':''}>Out of Service</option></select></div>`).join('') || 'No trains found.';
+      setText('#statusMessage', 'Your Admin account has been verified successfully.');
+
+    } catch (error) {
+      console.error('Admin dashboard error:', error);
+      showError(error.message || 'Unable to load dashboard.');
+    }
+  }
+
+  const trainStatusList = $('#trainStatusList');
+  if (trainStatusList) trainStatusList.addEventListener('change', async (event) => { const select = event.target.closest('[data-train-status]'); if (!select) return; select.disabled = true; try { const { error } = await client.rpc('set_train_status', { p_train_id: Number(select.dataset.trainStatus), p_status: select.value }); if (error) throw error; await loadDashboard(); } catch (error) { showError(error.message || 'Unable to update train status.'); } finally { select.disabled = false; } });
+
+  const logoutButton = $('#logoutButton');
+  if (logoutButton) logoutButton.addEventListener('click', async () => {
+    const button = $('#logoutButton');
+    button.disabled = true;
+    button.textContent = 'Signing out...';
+
+    const { error } = await client.auth.signOut();
+
+    if (error) {
+      showError(error.message);
+      button.disabled = false;
+      button.textContent = '↪ Sign Out';
+      return;
+    }
+
+    window.location.replace('index.html');
+  });
+
+  loadDashboard();
+})();
+</script>
+
+<script src="staff-dashboard.js"></script>
+<script src="staff-notifications.js"></script>
+<script src="staff-shell.js"></script>
+</body>
+</html>

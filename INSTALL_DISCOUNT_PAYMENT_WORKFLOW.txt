@@ -1,0 +1,49 @@
+JJCC RAILWAYS — DISCOUNT VERIFICATION & PASSENGER-LEVEL PAYMENT
+
+CONTENTS
+- script.js                         Modified booking, passenger type, ID upload, notifications, and payment-page logic
+- payment.html                      New passenger-level payment page
+- legacy-payment.html               Preserves the previous booking-level payment page for older bookings
+- policy.html                       Updated discount, ID, payment, and individual-seat expiry policies
+- admin.html                        Adds discount/payment review and staff notification links
+- superadmin.html                   Adds discount/payment review and staff notification links
+- discount-review.html              New Admin/Superadmin ID verification queue
+- passenger-payment-review.html     New Admin/Superadmin passenger receipt review queue
+- staff-notifications.html          New Admin/Superadmin notifications for ID and payment submissions
+- 15_discount_id_verification.sql   Adds Student/Senior/PWD discount support and booking RPC changes
+- 16_passenger_level_payment_workflow.sql
+                                    Adds per-passenger fare, ID/payment states, receipt review RPCs,
+                                    JCoins support, staff notifications, and individual seat release
+- 17_schedule_passenger_expiry.sql  Schedules individual passenger expiry every minute (pg_cron required)
+
+INSTALL ORDER
+1. Back up your Supabase database.
+2. In Supabase SQL Editor, run 15_discount_id_verification.sql.
+3. Run 16_passenger_level_payment_workflow.sql.
+4. If pg_cron is enabled (or after enabling it in Database > Extensions), run
+   17_schedule_passenger_expiry.sql. This is required for automatic release of only
+   the passenger seat whose 10-minute payment window expires.
+5. Deploy the HTML/JS files to the same website root, preserving the existing
+   folder structure. Do not delete the existing 01–14 SQL migration files.
+
+WORKFLOW INCLUDED
+- Passenger types: Regular, Student, Senior Citizen, PWD.
+- Student/Senior/PWD ID uploads: JPG, JPEG, PNG, WEBP, PDF; maximum 5 MB.
+- ID-pending passengers have no automatic expiry.
+- Admin and Superadmin can approve/reject IDs.
+- Approval applies 20%; rejection changes the passenger to Regular and recalculates the fare.
+- The 10-minute payment deadline begins per passenger when the ID decision notification is created.
+- Regular passengers can pay while discounted passengers await ID verification.
+- Passenger receipts and JCoins are tracked per passenger.
+- A submitted receipt remains pending until an Admin/Superadmin reviews it; review delay does not expire the seat.
+- If one passenger misses their payment deadline, only that passenger's outbound and return seat links are released.
+- JCoins are returned if a receipt is rejected or a passenger payment hold expires after a partial JCoins debit.
+- Legacy bookings without the new workflow flag are redirected to legacy-payment.html.
+
+IMPORTANT VALIDATION NOTES
+- JavaScript syntax was checked with Node.js.
+- The SQL migrations were prepared against the supplied schema and existing migrations 01–14,
+  but could not be executed against your live Supabase project in this environment.
+- Test on a Supabase staging project before production deployment, especially the RPCs,
+  storage policies, role policies, and the existing refund/JCoins reports.
+- Existing bookings created before this workflow remain on the legacy payment path.

@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap');
+:root{--navy:#0f1d3a;--navy2:#1a2d57;--gold:#d18408;--cream:#eef1f6;--ink:#182340;--muted:#6b7488;--line:#dfe4ee;--ok:#16794a;--bad:#b42318}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+header{background:linear-gradient(120deg,var(--navy),var(--navy2));color:#fff;padding:18px 40px;display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:4px solid var(--gold)}
+header h2{font-family:Oswald,sans-serif;font-size:22px;font-weight:600;letter-spacing:.6px}
+header a{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.35);padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600}
+header a:hover{background:rgba(255,255,255,.12)}
+
+main{width:100%;padding:30px 40px 48px;margin:0}
+.heading{margin-bottom:22px}
+.heading h1{font-family:Oswald,sans-serif;font-size:32px;font-weight:600;letter-spacing:.3px}
+.heading p{color:var(--muted);font-size:14px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:22px}
+.stat{background:var(--navy);color:#fff;padding:16px 20px;border-radius:10px;border-top:4px solid var(--gold)}
+.stat:nth-child(2){border-top-color:#35b37e}
+.stat:nth-child(3){border-top-color:#e5594b}
+.stat span{color:#b7c4e2;font-size:13px}
+.stat h2{font-family:Oswald,sans-serif;font-size:40px;font-weight:600;line-height:1.15;margin-top:4px;font-variant-numeric:tabular-nums;letter-spacing:1px}
+
+.panel{background:#fff;padding:22px 24px;border-radius:12px;border:1px solid var(--line)}
+.panel h3{font-family:Oswald,sans-serif;font-size:20px;font-weight:600}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+input,select{min-height:42px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:#fff;color:var(--ink);font-family:inherit}
+input{flex:1;min-width:220px}
+button{border:0;border-radius:8px;padding:10px 20px;background:var(--gold);color:#fff;font-weight:700;font-size:14px;cursor:pointer}
+button:hover{background:#b87206}
+button:disabled{opacity:.6;cursor:not-allowed}
+
+.table-wrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;min-width:1050px}
+th,td{padding:13px 14px;text-align:left;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}
+th{position:sticky;top:0;z-index:1;background:#f6f8fc;color:var(--muted);font-size:12px;font-weight:600;white-space:nowrap}
+tbody tr:hover{background:#fafbfe}
+tbody tr:last-child td{border-bottom:0}
+td strong{display:block;margin-bottom:2px}
+.muted{display:block;color:var(--muted);font-size:12px}
+.arrow{color:var(--gold);font-weight:700;margin:0 3px}
+
+/* Passengers: compact two-per-row instead of one tall column */
+td:nth-child(6){min-width:260px}
+td:nth-child(6)>div{display:inline-block;width:calc(50% - 6px);margin:0 4px 8px 0!important;padding:6px 9px;background:#f6f8fc;border-radius:8px;vertical-align:top}
+td:nth-child(6) strong{margin-bottom:0}
+
+.status{display:inline-block;border-radius:999px;padding:5px 11px;background:#eceff5;color:#4a5468;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.status.confirmed{background:#e2f5e9;color:var(--ok)}
+.status.cancelled{background:#fdecea;color:var(--bad)}
+.status.pending_payment{background:#fff0d6;color:#9a5a00}
+.status.expired{background:#e9e1fb;color:#5b34b0}
+#message{padding:12px 14px;margin-bottom:14px;border-radius:8px;display:none;background:#fff7e8;border-left:4px solid var(--gold);color:#825600}
+#empty{text-align:center;padding:35px;color:var(--muted);display:none}
+
+@media (max-width:700px){
+  header{flex-direction:column;align-items:flex-start;padding:16px}
+  main{padding:20px 14px 36px}
+  .panel{padding:14px}
+  td:nth-child(6)>div{width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}

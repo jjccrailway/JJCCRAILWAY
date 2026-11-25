@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delay Compensation Operations | JJCC Railways</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{--navy:#102044;--gold:#d18408;--cream:#f5f3ee;--ink:#172440;--muted:#77766f;--line:#e5e3de}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+    body{background:var(--cream);color:var(--ink)}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:250px;height:100vh;background:var(--navy);color:#fff;padding:28px 20px;display:flex;flex-direction:column}
+    .brand{font-size:21px;font-weight:bold;margin-bottom:8px}.brand span{color:var(--gold)}
+    .subtitle{color:#b9c4d7;font-size:10px;letter-spacing:2px;margin-bottom:40px}
+    .menu-title{color:#9eacc3;font-size:11px;margin:18px 10px 12px}
+    .menu-item{display:block;text-decoration:none;color:#dce4f1;padding:14px 12px;border-radius:7px;margin-bottom:7px;font-size:13px}
+    .menu-item:hover,.menu-item.active{background:#263d64;color:#fff}
+    .logout{margin-top:auto;background:#263d64;border:0;color:#fff;padding:13px;border-radius:7px;cursor:pointer}
+    .main{margin-left:250px;padding:35px;max-width:1100px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:28px}
+    .topbar h1{font-size:27px}.topbar p{color:var(--muted);margin-top:7px;font-size:13px}
+    .badge{background:#fff1d8;color:#a66a08;padding:9px 14px;border-radius:20px;font-size:11px;font-weight:bold}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:25px;margin-bottom:22px}
+    .panel h2{font-size:19px;margin-bottom:10px}.panel>p{color:var(--muted);font-size:13px;line-height:1.7;margin-bottom:18px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    label{display:block;font-size:12px;font-weight:bold;margin-bottom:7px}
+    select,input{width:100%;padding:12px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);font-size:14px}
+    .field{margin-bottom:16px}.submit{background:var(--gold);color:#fff;border:0;border-radius:7px;padding:13px 18px;font-weight:bold;cursor:pointer}
+    .submit:disabled{opacity:.55;cursor:not-allowed}
+    .status{margin-top:16px;padding:13px;border-radius:7px;background:#f4f6fa;color:var(--ink);font-size:13px;line-height:1.6;white-space:pre-line}
+    .status.error{background:#fff0ef;color:#b42318}.status.success{background:#edf8f0;color:#176b35}
+    .note{font-size:12px;color:var(--muted);line-height:1.7;margin-top:15px}
+    @media(max-width:700px){.sidebar{position:relative;width:100%;height:auto}.subtitle{margin-bottom:20px}.logout{margin-top:15px}.main{margin:0;padding:18px}.grid{grid-template-columns:1fr}.topbar h1{font-size:22px}}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">🚆 JJCC <span>RAILWAYS</span></div>
+    <p class="subtitle">RAILWAY OPERATIONS</p>
+    <p class="menu-title">OPERATIONS</p>
+    <a class="menu-item" id="dashboardLink" href="admin.html">Dashboard</a>
+    <a class="menu-item active" href="delay-operations.html">Delay Compensation</a>
+    <a class="menu-item" href="bookings.html">Bookings Management</a>
+    <button class="logout" id="logoutButton">↪ Sign Out</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><h1>Delay Compensation</h1><p>Record verified actual arrival data. Passengers may then submit optional compensation requests for Admin review.</p></div>
+      <span class="badge" id="roleBadge">STAFF ONLY</span>
+    </header>
+
+    <section class="panel">
+      <h2>Record Verified Train Arrival</h2>
+      <p>Use this only after the train's actual arrival at the selected destination has been verified. The system compares it with the scheduled arrival time and calculates the compensation tier for confirmed bookings.</p>
+      <form id="delayForm">
+        <div class="grid">
+          <div class="field"><label for="trainSelect">Train</label><select id="trainSelect" required><option value="">Loading trains...</option></select></div>
+          <div class="field"><label for="travelDate">Travel date</label><input id="travelDate" type="date" required></div>
+          <div class="field"><label for="stationSelect">Passenger destination</label><select id="stationSelect" required><option value="">Loading stations...</option></select></div>
+          <div class="field"><label for="actualArrival">Verified actual arrival (Philippine time)</label><input id="actualArrival" type="datetime-local" required></div>
+        </div>
+        <button class="submit" id="submitButton" type="submit">Record Verified Arrival</button>
+      </form>
+      <div class="status" id="statusMessage" role="status">Checking staff access...</div>
+      <p class="note">Compensation tiers: below 30 minutes = 0%; 30–59 minutes = 25%; 60–119 minutes = 50%; 120 minutes or more = 100%. A train/date/destination incident can only be recorded once to prevent duplicate credits.</p>
+    </section>
+  </main>
+
+  <script>
+  (() => {
+    'use strict';
+    const client = window.supabase.createClient(
+      'https://ocjyyfzuoiprwajwyize.supabase.co',
+      'sb_publishable_XZu8suOKCWB9Zp7dYhzxgQ_Yaq5zxo8'
+    );
+    const $ = s => document.querySelector(s);
+    const status = (message, kind='') => { const el=$('#statusMessage'); el.textContent=message; el.className=`status ${kind}`.trim(); };
+
+    async function init(){
+      try{
+        const {data:authData,error:authError}=await client.auth.getUser();
+        if(authError) throw authError;
+        if(!authData.user){location.replace('index.html');return;}
+        const {data:role,error:roleError}=await client.rpc('current_user_role');
+        if(roleError) throw roleError;
+        if(!['admin','super_admin'].includes(role)){location.replace('book.html');return;}
+        $('#roleBadge').textContent=role==='super_admin'?'SUPER ADMIN':'ADMIN';
+        $('#dashboardLink').href=role==='super_admin'?'superadmin.html':'admin.html';
+        const [trainsResult,stationsResult]=await Promise.all([
+          client.from('trains').select('train_id,train_code,train_name').not('train_code', 'like', 'RTG-%').order('train_code'),
+          client.from('stations').select('station_id,station_name').order('station_name')
+        ]);
+        if(trainsResult.error) throw trainsResult.error;
+        if(stationsResult.error) throw stationsResult.error;
+        $('#trainSelect').innerHTML='<option value="">Select train</option>'+(trainsResult.data||[]).map(t=>`<option value="${t.train_id}">${String(t.train_code||'')} — ${String(t.train_name||'')}</option>`).join('');
+        $('#stationSelect').innerHTML='<option value="">Select destination station</option>'+(stationsResult.data||[]).map(s=>`<option value="${s.station_id}">${String(s.station_name||'')}</option>`).join('');
+        status('Staff access verified. Select the train, travel date, destination, and verified actual arrival time.','success');
+      }catch(error){console.error(error);status(error.message||'Unable to load railway operations.','error');}
+    }
+
+    $('#delayForm').addEventListener('submit',async event=>{
+      event.preventDefault();
+      const button=$('#submitButton');
+      const trainId=Number($('#trainSelect').value);
+      const stationId=Number($('#stationSelect').value);
+      const travelDate=$('#travelDate').value;
+      const actualLocal=$('#actualArrival').value;
+      if(!trainId||!stationId||!travelDate||!actualLocal){status('Complete all fields before submitting.','error');return;}
+      const actualDate=new Date(actualLocal);
+      if(Number.isNaN(actualDate.getTime())){status('Enter a valid actual arrival date and time.','error');return;}
+      button.disabled=true;button.textContent='Recording verified arrival...';
+      try{
+        const {data,error}=await client.rpc('record_train_delay_incident',{
+          p_train_id:trainId,
+          p_travel_date:travelDate,
+          p_arrival_station_id:stationId,
+          p_actual_arrival_at:actualDate.toISOString()
+        });
+        if(error) throw error;
+        const message=`Verified arrival recorded.\nDelay: ${data.delay_minutes} minutes\nEligible compensation rate: ${data.compensation_percent}%\nNo JCoins credited. Passengers may now submit requests for Admin review.\n${data.message}`;
+        status(message,'success');
+        $('#delayForm').reset();
+      }catch(error){console.error(error);status(error.message||'Unable to record delay incident.','error');}
+      finally{button.disabled=false;button.textContent='Record Verified Arrival';}
+    });
+
+    $('#logoutButton').addEventListener('click',async()=>{const {error}=await client.auth.signOut();if(error){status(error.message,'error');return;}location.replace('index.html');});
+    init();
+  })();
+  </script>
+</body>
+</html>
