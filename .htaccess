@@ -1,2 +1,5 @@
-DirectoryIndex index.html index.php
+# Block direct web access to private files (Apache / XAMPP)
+<FilesMatch "^(\.env.*|.*\.log)$">
+  Require all denied
+</FilesMatch>
 Options -Indexes
